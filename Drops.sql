@@ -1,0 +1,12 @@
+DROP TABLE IF EXISTS market.listing_log;
+DROP TABLE IF EXISTS market.listing_log_info;
+DROP TABLE IF EXISTS market.currency;
+DROP TABLE IF EXISTS market.listing;
+DROP TABLE IF EXISTS market.listing_status;
+DROP TABLE IF EXISTS market.listing_contract;
+DROP TABLE IF EXISTS market.contract_type;
+DROP TABLE IF EXISTS market."user";
+DROP PROCEDURE IF EXISTS market.modify_item_contract;
+DROP PROCEDURE IF EXISTS market.modify_currency;
+DROP PROCEDURE IF EXISTS market.get_user;
+DROP PROCEDURE IF EXISTS market.create_listing;
