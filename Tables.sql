@@ -24,8 +24,10 @@ CREATE TABLE IF NOT EXISTS market.listing_contract
     contract_type_id smallint NOT NULL,
     supply integer,
 	fee smallint NOT NULL DEFAULT 0,
+	added_on timestamp(0) without time zone NOT NULL DEFAULT NOW(),
     is_active boolean NOT NULL DEFAULT true,
 	UNIQUE (address),
+	UNIQUE (title),
     PRIMARY KEY (listing_contract_id)
 );
 
@@ -70,17 +72,11 @@ CREATE TABLE IF NOT EXISTS market.listing_log
     listing_log_id serial NOT NULL,
     listing_id integer NOT NULL,
     listing_status_id smallint NOT NULL,
-    logged_on timestamp(0) without time zone NOT NULL,
-    listing_log_info_id integer,
+    logged_on timestamp(0) without time zone NOT NULL DEFAULT NOW(),
+    price integer,
+    amount integer,
+	currency_id smallint,
     PRIMARY KEY (listing_log_id)
-);
-
-CREATE TABLE IF NOT EXISTS market.listing_log_info
-(
-    listing_log_info_id serial NOT NULL,
-    new_price integer,
-    new_amount integer,
-    PRIMARY KEY (listing_log_info_id)
 );
 
 ALTER TABLE IF EXISTS market.listing_contract
@@ -129,8 +125,8 @@ ALTER TABLE IF EXISTS market.currency
     NOT VALID;
 
 ALTER TABLE IF EXISTS market.listing_log
-    ADD FOREIGN KEY (listing_log_info_id)
-    REFERENCES market.listing_log_info (listing_log_info_id) MATCH SIMPLE
+    ADD FOREIGN KEY (currency_id)
+    REFERENCES market.currency (currency_id) MATCH SIMPLE
     ON UPDATE NO ACTION
     ON DELETE NO ACTION
     NOT VALID;

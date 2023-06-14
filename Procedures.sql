@@ -55,6 +55,17 @@ BEGIN
 END;
 $$;
 
+CREATE OR REPLACE PROCEDURE market.insert_log_info(listing_id INTEGER, listing_status_id SMALLINT, price INTEGER, amount INTEGER, currency_id SMALLINT)
+SECURITY DEFINER
+LANGUAGE plpgsql
+AS
+$$
+BEGIN
+	INSERT INTO market.listing_log(listing_id, listing_status_id, price, amount, currency_id)
+	VALUES (listing_id, listing_status_id, price, amount, currency_id);
+END;
+$$;
+
 CREATE OR REPLACE PROCEDURE market.create_listing(new_listing_id INTEGER, item_address CHARACTER VARYING(42), listing_token_id INTEGER, 
 	listing_amount INTEGER, listing_price INTEGER, listing_currency_id SMALLINT, lister_address CHARACTER VARYING(42))
 SECURITY DEFINER
@@ -63,6 +74,7 @@ AS
 $$
 DECLARE user_id INTEGER;
 DECLARE contract_id SMALLINT;
+DECLARE log_info_id INTEGER;
 BEGIN
 	CALL market.get_user(lister_address, user_id);
 	
@@ -72,5 +84,36 @@ BEGIN
 	
 	INSERT INTO market.listing(listing_id, listing_contract_id, token_id, amount, price, currency_id, user_id)
 	VALUES (new_listing_id, contract_id, listing_token_id, listing_amount, listing_price, listing_currency_id, user_id);
+	
+	CALL market.insert_log_info(new_listing_id, 1::SMALLINT, listing_price, listing_amount, listing_currency_id::SMALLINT);
+END;
+$$;
+
+DROP PROCEDURE IF EXISTS market.update_listing;
+CREATE OR REPLACE PROCEDURE market.update_listing(update_listing_id INTEGER, new_listing_status_id SMALLINT, new_price INTEGER, new_amount INTEGER, new_currency_id SMALLINT, buyer CHARACTER VARYING(42) DEFAULT NULL)
+SECURITY DEFINER
+LANGUAGE plpgsql
+AS
+$$
+DECLARE listing_buyer INTEGER;
+DECLARE u_status_id SMALLINT;
+DECLARE u_price INTEGER;
+DECLARE u_amount INTEGER;
+DECLARE u_currency_id SMALLINT;
+BEGIN
+	IF buyer IS NOT NULL THEN
+		CALL market.get_user(buyer, listing_buyer);
+	END IF;
+	
+	SELECT COALESCE(new_listing_status_id, listing_status_id), COALESCE(new_price, price), COALESCE(new_amount, amount), COALESCE(new_currency_id, currency_id)
+	INTO u_status_id, u_price, u_amount, u_currency_id
+	FROM market.listing L
+	WHERE L.listing_id = update_listing_id;
+	
+	UPDATE market.listing
+	SET listing_status_id = u_status_id, price = u_price, amount = u_amount, currency_id = u_currency_id, buyer_id = listing_buyer
+	WHERE listing_id = update_listing_id;
+	
+	CALL market.insert_log_info(update_listing_id, u_status_id, u_price, u_amount, u_currency_id);
 END;
 $$;
