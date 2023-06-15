@@ -8,7 +8,7 @@ ALTER SEQUENCE market.listing_status_listing_status_id_seq RESTART WITH 1;
 INSERT INTO market.listing_status(status)
 VALUES ('Active'), ('Updated'), ('Purchased'), ('Removed');
 
-CALL market.modify_item_contract('0x6C2F72CC495658e9e690aF821EB166847B45EFEb', 'Macho Kats', 'A collection of meerkats that are macho.', 
+CALL market.modify_listing_contract('0x6C2F72CC495658e9e690aF821EB166847B45EFEb', 'Macho Kats', 'A collection of meerkats that are macho.', 
 	'https://bafybeifnrceguerrlx23gfi7hd3qxdwrflgs3y6bqcuhif4mhbtpmqy37y.ipfs.dweb.link/1.png', 3::SMALLINT, 20, 5::SMALLINT, true);
 	
 CALL market.modify_currency(0::SMALLINT, 6::SMALLINT, '0x0000000000000000000000000000000000000000', 18::SMALLINT, 

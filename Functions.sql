@@ -59,9 +59,10 @@ $func$;
 
 SELECT * FROM market.view_collections(NOW()::TIMESTAMP(0) without time zone, 0::SMALLINT, 10::SMALLINT);
 
-CREATE OR REPLACE FUNCTION market.view_activity(after_time TIMESTAMP(0) without time zone, page SMALLINT, page_size SMALLINT, filter_user_address CHARACTER VARYING(42) DEFAULT NULL)
+CREATE OR REPLACE FUNCTION market.view_activity(after_time TIMESTAMP(0) without time zone, page SMALLINT, page_size SMALLINT, 
+		filter_user_address CHARACTER VARYING(42) DEFAULT NULL, filter_listing_id INTEGER DEFAULT NULL, filter_token_id INTEGER DEFAULT NULL)
 RETURNS TABLE (listing_id INTEGER, token_id INTEGER, status TEXT, logged_on TIMESTAMP(0) without time zone, prev_price INTEGER, logged_price INTEGER, prev_amount INTEGER, logged_amount INTEGER, 
-			   prev_currency SMALLINT, logged_currency SMALLINT, seller CHARACTER VARYING(42))
+			   prev_currency SMALLINT, logged_currency SMALLINT, seller CHARACTER VARYING(42), buyer CHARACTER VARYING(42))
 LANGUAGE plpgsql
 SECURITY DEFINER
 AS
@@ -69,16 +70,20 @@ $func$
 BEGIN
 	RETURN QUERY
 	SELECT L.listing_id, L.token_id, LS.status, LL.logged_on, LAG(LL.price, 1) OVER(PARTITION BY L.listing_id ORDER BY LL.listing_log_id), LL.price, 
-		LAG(LL.amount, 1) OVER(PARTITION BY L.listing_id ORDER BY LL.listing_log_id), LL.amount, LAG(LL.currency_id, 1) OVER(PARTITION BY L.listing_id ORDER BY LL.listing_log_id), LL.currency_id, U.address
+		LAG(LL.amount, 1) OVER(PARTITION BY L.listing_id ORDER BY LL.listing_log_id), LL.amount, LAG(LL.currency_id, 1) OVER(PARTITION BY L.listing_id ORDER BY LL.listing_log_id), LL.currency_id, U.address, 
+		LU.address
 	FROM market.listing_log LL
 	JOIN market.listing L ON L.listing_id = LL.listing_id
 	JOIN market.user U ON U.user_id = L.user_id
+	LEFT JOIN market.user LU ON LU.user_id = L.buyer_id
 	JOIN market.listing_status LS ON LS.listing_status_id = LL.listing_status_id
-	WHERE (filter_user_address IS NULL OR U.address = filter_user_address) AND LL.logged_on <= after_time
+	WHERE (filter_user_address IS NULL OR U.address = filter_user_address)
+		AND (filter_listing_id IS NULL OR LL.listing_id = filter_listing_id) 
+		AND (filter_token_id IS NULL OR L.token_id = filter_token_id) AND LL.logged_on <= after_time
 	ORDER BY LL.listing_log_id
 	OFFSET (page * page_size) ROWS
 	FETCH FIRST page_size ROW ONLY;
 END;
 $func$;
 
-SELECT * FROM market.view_activity(NOW()::TIMESTAMP(0) without time zone, 0::SMALLINT, 10::SMALLINT, '0xf8c2099B8F5403356ACA29cB5aFFf4f861D7fd99');
+SELECT * FROM market.view_activity(NOW()::TIMESTAMP(0) without time zone, 0::SMALLINT, 10::SMALLINT, NULL, 1);

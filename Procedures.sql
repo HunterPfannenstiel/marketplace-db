@@ -1,4 +1,4 @@
-CREATE OR REPLACE PROCEDURE market.modify_item_contract(address CHARACTER VARYING(42), title TEXT, description TEXT, 
+CREATE OR REPLACE PROCEDURE market.modify_listing_contract(address CHARACTER VARYING(42), title TEXT, description TEXT, 
 	cover_image TEXT, contract_type_id SMALLINT, supply INTEGER, fee SMALLINT, is_active BOOLEAN)
 SECURITY DEFINER
 LANGUAGE plpgsql
@@ -89,7 +89,6 @@ BEGIN
 END;
 $$;
 
-DROP PROCEDURE IF EXISTS market.update_listing;
 CREATE OR REPLACE PROCEDURE market.update_listing(update_listing_id INTEGER, new_listing_status_id SMALLINT, new_price INTEGER, new_amount INTEGER, new_currency_id SMALLINT, buyer CHARACTER VARYING(42) DEFAULT NULL)
 SECURITY DEFINER
 LANGUAGE plpgsql
