@@ -62,8 +62,11 @@ CREATE TABLE IF NOT EXISTS market.currency
     decimals smallint NOT NULL,
 	image text NOT NULL,
 	ticker text NOT NULL,
-	color character varying(7) NOT NULL,
+	fill_color character varying(7) NOT NULL,
+	border_color character varying(7) NOT NULL,
+	token_id integer,
     is_active boolean NOT NULL DEFAULT true,
+	UNIQUE (address, token_id),
     PRIMARY KEY (currency_id)
 );
 

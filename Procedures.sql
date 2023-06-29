@@ -19,21 +19,22 @@ END;
 $$;
 
 CREATE OR REPLACE PROCEDURE market.modify_currency(currency_id SMALLINT, contract_type_id SMALLINT, address CHARACTER VARYING(42), decimals SMALLINT,
-	image TEXT, ticker TEXT, color CHARACTER VARYING(7), is_active BOOLEAN DEFAULT true)
+	image TEXT, ticker TEXT, fill_color CHARACTER VARYING(7), border_color CHARACTER VARYING(7), is_active BOOLEAN DEFAULT true, token_id INTEGER DEFAULT NULL)
 SECURITY DEFINER
 LANGUAGE plpgsql
 AS
 $$
 BEGIN
 	MERGE INTO market.currency T
-	USING (SELECT currency_id, contract_type_id, address, decimals, image, ticker, color, is_active) S ON S.currency_id = T.currency_id
+	USING (SELECT currency_id, contract_type_id, address, decimals, image, ticker, fill_color, border_color, is_active, token_id) S ON S.currency_id = T.currency_id
 	WHEN MATCHED THEN
 		UPDATE SET contract_type_id = COALESCE(S.contract_type_id, T.contract_type_id), 
 			address = COALESCE(S.address, T.address), decimals = COALESCE(S.decimals, T.decimals), image = COALESCE(S.image, T.image), 
-			ticker = COALESCE(S.ticker, T.ticker), color = COALESCE(S.color, T.color), is_active = S.is_active
+			ticker = COALESCE(S.ticker, T.ticker), fill_color = COALESCE(S.fill_color, T.fill_color), border_color = COALESCE(S.border_color, T.border_color), 
+			is_active = COALESCE(S.is_active, T.is_active), token_id = COALESCE(S.token_id, T.token_id)
 	WHEN NOT MATCHED THEN
-	INSERT (currency_id, contract_type_id, address, decimals, image, ticker, color)
-	VALUES (S.currency_id, S.contract_type_id, S.address, S.decimals, S.image, S.ticker, S.color);
+	INSERT (currency_id, contract_type_id, address, decimals, image, ticker, fill_color, border_color, token_id)
+	VALUES (S.currency_id, S.contract_type_id, S.address, S.decimals, S.image, S.ticker, S.fill_color, S.border_color, S.token_id);
 END;
 $$;
 

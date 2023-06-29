@@ -12,7 +12,7 @@ BEGIN
 	JOIN market.listing_contract LC ON LC.listing_contract_id = L.listing_contract_id 
 		AND LC.title = collection_title
 	WHERE L.created_on <= after_time AND L.listing_status_id IN (1, 2)
-	ORDER BY L.created_on
+	ORDER BY LC.title ASC
 	OFFSET (page * page_size) ROWS
 	FETCH FIRST page_size ROW ONLY;
 END;
@@ -23,14 +23,14 @@ SELECT * FROM market.view_collection_listings('Macho Kats', NOW()::TIMESTAMP(0) 
 --Let the view_collection_listings return a little extra data in order to just display a modal of the listing instead of navigating to a new page
 
 CREATE OR REPLACE FUNCTION market.get_currencies(is_active_filter BOOLEAN DEFAULT NULL)
-RETURNS TABLE (currency_id SMALLINT, decimals SMALLINT, color CHARACTER VARYING(7), image TEXT, ticker TEXT, token_type TEXT)
+RETURNS TABLE (currency_id SMALLINT, decimals SMALLINT, fill_color CHARACTER VARYING(7), border_color CHARACTER VARYING(7), image TEXT, ticker TEXT, token_type TEXT, token_id INTEGER, address CHARACTER VARYING(42))
 LANGUAGE plpgsql
 SECURITY DEFINER
 AS
 $func$
 BEGIN
 	RETURN QUERY
-	SELECT C.currency_id, C.decimals, C.color, C.image, C.ticker, CT.type
+	SELECT C.currency_id, C.decimals, C.fill_color, C.border_color, C.image, C.ticker, CT.type, C.token_id, C.address
 	FROM market.currency C
 	JOIN market.contract_type CT ON CT.contract_type_id = C.contract_type_id
 	WHERE is_active_filter IS NULL OR C.is_active = is_active_filter;
@@ -86,4 +86,4 @@ BEGIN
 END;
 $func$;
 
-SELECT * FROM market.view_activity(NOW()::TIMESTAMP(0) without time zone, 0::SMALLINT, 10::SMALLINT, NULL, 1);
+SELECT * FROM market.view_activity(NOW()::TIMESTAMP(0) without time zone, 0::SMALLINT, 10::SMALLINT);

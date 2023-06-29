@@ -1,0 +1,19 @@
+CALL market.create_listing(2, '0x6C2F72CC495658e9e690aF821EB166847B45EFEb', 2, 1, 1000, 0::SMALLINT, '0xf8c2099B8F5403356ACA29cB5aFFf4f861D7fd99');
+
+CALL market.create_listing(3, '0x6C2F72CC495658e9e690aF821EB166847B45EFEb', 3, 1, 1000, 1::SMALLINT, '0xf8c2099B8F5403356ACA29cB5aFFf4f861D7fd99');
+
+CALL market.create_listing(4, '0x6C2F72CC495658e9e690aF821EB166847B45EFEb', 4, 1, 1000, 2::SMALLINT, '0xf8c2099B8F5403356ACA29cB5aFFf4f861D7fd99');
+
+CALL market.update_listing(2, 2::SMALLINT, 2000, NULL, NULL);
+
+CALL market.update_listing(2, 2::SMALLINT, 3000, NULL, NULL);
+
+CALL market.update_listing(2, 2::SMALLINT, 1000, NULL, NULL);
+
+CALL market.update_listing(3, 2::SMALLINT, 1001, NULL, 2::SMALLINT, NULL);
+
+CALL market.update_listing(3, 2::SMALLINT, 1500, NULL, NULL);
+
+CALL market.update_listing(4, 2::SMALLINT, 1001, NULL, 3::SMALLINT, NULL);
+
+CALL market.update_listing(2, 2::SMALLINT, 500, NULL, NULL);
